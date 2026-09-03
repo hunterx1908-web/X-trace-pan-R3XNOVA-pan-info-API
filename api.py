@@ -9,11 +9,11 @@ app = Flask(__name__)
 VALID_KEY = "@R3XNOVA"
 
 # Original API details
-ORIGINAL_API_URL = "https://hb5vhd.kubeletto.app/api/pan-info"
+ORIGINAL_API_URL = "https://rohit-apis-nine.vercel.app/api/pan-info"
 ORIGINAL_KEY = "Bhai"
 
 # 🔥 API Expiry Date (4 din — aaj included)
-API_EXPIRY = "2026-11-1"
+API_EXPIRY = "2026-11-01"
 
 def is_expired():
     try:
@@ -127,10 +127,10 @@ def pan_info():
     except requests.exceptions.Timeout:
         return jsonify({
             "status": False,
-            "message": "No data found",
+            "message": "Request timeout. Please try again later.",
             "developer": "@x_TRACEOWNER",
             "credit": "@x_TRACEOWNER"
-        }), 404
+        }), 504
         
     except requests.exceptions.ConnectionError:
         return jsonify({
