@@ -1,7 +1,7 @@
 [project]
 name = "pan-info-api"
 version = "1.0.0"
-description = "PAN Info API"
+description = "PAN Info API with Expiry"
 requires-python = ">=3.9"
 dependencies = [
     "Flask==2.3.3",

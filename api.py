@@ -1,6 +1,7 @@
 import os
 import requests
 from flask import Flask, request, jsonify
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -8,8 +9,18 @@ app = Flask(__name__)
 VALID_KEY = "@R3XNOVA"
 
 # Original API details
-ORIGINAL_API_URL = "https://osint-api-delta.vercel.app/api/pan-info"
-ORIGINAL_KEY = "@x_TRACEOWNER"
+ORIGINAL_API_URL = "https://hb5vhd.kubeletto.app/api/pan-info"
+ORIGINAL_KEY = "Bhai"
+
+# 🔥 API Expiry Date (4 din — aaj included)
+API_EXPIRY = "2026-11-1"
+
+def is_expired():
+    try:
+        expiry = datetime.strptime(API_EXPIRY, "%Y-%m-%d")
+        return datetime.utcnow() > expiry
+    except:
+        return False
 
 @app.route('/')
 def home():
@@ -18,14 +29,26 @@ def home():
         "message": "PAN Info API is working! (X-TRACE Edition)",
         "developer": "@x_TRACEOWNER",
         "credit": "@x_TRACEOWNER",
+        "expires_on": API_EXPIRY,
+        "status": "Active" if not is_expired() else "Expired",
         "endpoints": {
             "info": "/api/pan-info?key=YOUR_KEY&pan=PAN_NUMBER"
         },
-        "example": "/api/pan-info?key=@R3XNOVA&pan=BNZPM2501F"
+        "example": "/api/pan-info?key=@R3XNOVA&pan=BOKPS7056D"
     })
 
 @app.route('/api/pan-info')
 def pan_info():
+    # 🔥 Check if API is expired
+    if is_expired():
+        return jsonify({
+            "status": False,
+            "error": f"API expired on {API_EXPIRY}! Please contact support.",
+            "developer": "@x_TRACEOWNER",
+            "credit": "@x_TRACEOWNER",
+            "expires_on": API_EXPIRY
+        }), 401
+    
     # Get parameters
     key = request.args.get('key')
     pan = request.args.get('pan')
@@ -80,7 +103,7 @@ def pan_info():
         
         # 🔥 Clean response
         if isinstance(data, dict):
-            # Remove original developer, channel and credits_remaining
+            # Remove original developer if exists
             data.pop('developer', None)
             data.pop('channel', None)
             data.pop('credits_remaining', None)
@@ -97,46 +120,47 @@ def pan_info():
             # Add our branding
             data['developer'] = '@x_TRACEOWNER'
             data['credit'] = '@x_TRACEOWNER'
+            data['api_expires_on'] = API_EXPIRY
             
         return jsonify(data)
         
     except requests.exceptions.Timeout:
         return jsonify({
             "status": False,
-            "error": "Server is busy! Please try again after some time.",
+            "message": "No data found",
             "developer": "@x_TRACEOWNER",
             "credit": "@x_TRACEOWNER"
-        }), 504
+        }), 404
         
     except requests.exceptions.ConnectionError:
         return jsonify({
             "status": False,
-            "error": "Network issue! Please check your connection.",
+            "message": "No data found",
             "developer": "@x_TRACEOWNER",
             "credit": "@x_TRACEOWNER"
-        }), 503
+        }), 404
         
     except requests.exceptions.RequestException as e:
         return jsonify({
             "status": False,
-            "error": "Service temporarily unavailable. Please try again later.",
+            "message": "No data found",
             "developer": "@x_TRACEOWNER",
             "credit": "@x_TRACEOWNER"
-        }), 500
+        }), 404
         
     except Exception as e:
         return jsonify({
             "status": False,
-            "error": "Something went wrong. Please try again later.",
+            "message": "No data found",
             "developer": "@x_TRACEOWNER",
             "credit": "@x_TRACEOWNER"
-        }), 500
+        }), 404
 
 @app.route('/api/pan-info/<path:path>')
 def catch_all(path):
     return jsonify({
         "status": False,
-        "error": "Invalid endpoint. Use /api/pan-info?key=YOUR_KEY&pan=PAN_NUMBER",
+        "message": "No data found",
         "developer": "@x_TRACEOWNER",
         "credit": "@x_TRACEOWNER"
     }), 404
